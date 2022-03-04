@@ -14,6 +14,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'getaway';
+  src: url('../font/getaway.otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
 :root {
   /* Font/text values */
   --heading-font: 'NeueMetana', sans-serif;
