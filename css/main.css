@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap');
+
+@font-face {
+  font-family: 'NeueMetana';
+  src: url('../font/NeueMetana-Bold.otf');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'NeueMetana';
+  src: url('../font/NeueMetana-Regular.otf');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  /* Font/text values */
+  --heading-font: 'NeueMetana', sans-serif;
+  --text-font: 'Poppins', sans-serif;
+  /* Positioning */
+  --content-width: 90%;
+  --content-max-width: 1240px;
+  --header-height: 75px;
+}
+
+:root[data-theme="theme-dark"] {
+  /* Colors: */
+  --primary: #1fe982;
+  --primary-light: #865ee4;
+  --secondary: #e9e81f;
+  --card-border: #FFFFFF12;
+  --bg-emphasize: #3d3a50;
+  --bg-dark: #1a1c22;
+  --bg-lighter: #2a2c33;
+  --text-primary: #FFFFFF;
+  --text-secondary: #FFFFFFA3;
+  --text-tertiary: #606878;
+  --shadow-color: #00000059;
+}
+
+:root[data-theme="theme-light"] {
+  --primary: #1fe982;
+  --primary-light: #865ee4;
+  --secondary: #d6c400;
+  --card-border: #00000012;
+  --bg-emphasize: #E2E2E94D;
+  --bg-dark: #ffffff;
+  --bg-lighter: #f6f7fa;
+  --text-primary: #161616;
+  --text-secondary: #161616B3;
+  --text-tertiary: #9a9a9f;
+  --shadow-color: #0000000f;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--text-font);
+  color: var(--text-primary);
+  transition: background-color .5s ease, color .5s ease;
+  scroll-behavior: smooth;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--heading-font);
+  color: var(--primary);
+  margin-bottom: 4rem;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg-dark);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.wrapper {
+  width: var(--content-width);
+  max-width: var(--content-max-width);
+}
+
+label {
+  display: block;
+  margin-bottom: .4%;
+}
+
+input {
+  display: block;
+  width: 100%;
+  margin-bottom: 3%;
+  padding: 12px;
+  background-color: var(--bg-lighter);
+  border: 1px solid var(--card-border);
+  border-radius: 5px;
+}

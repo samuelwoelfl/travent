@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="theme-dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Travent</title>
+
+  <link rel="stylesheet" href="/css/main.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD428BZelApsygZBJJlGJXvmCzBNldPTSY&callback=initMap">
+  </script>
+  <script src="js/form.js"></script>
+
+
+</head>
+
+<body>
+  <div class="wrapper">
+    <h1>travent - automatic travell planner for upcoming events</h1>
+    <form action="javascript:sendData()">
+      <label for="source_cal">Source Calendar URL (share through Google Cal):</label>
+      <input type="text" id="source_cal" name="source_cal" value="">
+
+      <label for="destination_cal">Destination Calendar for the new entries</label>
+      <input type="text" id="destination_cal" name="destination_cal" value="">
+
+      <label for="start">Start-Location</label>
+      <input type="text" id="start" name="start" value="">
+
+      <label for="end">Destination-Location (optional - needed if not in the calendar event)</label>
+      <input type="text" id="end" name="end" value="" optional="true">
+
+      <label for="buffer">Buffer at destination (optional - normal is 5 min)</label>
+      <input type="text" id="buffer" name="buffer" value="" optional="true">
+
+      <input type="submit" value="Abschicken">
+    </form>
+  </div>
+</body>
+
+</html>
