@@ -4,13 +4,36 @@ let delay = 2000;
 var vevents;
 var veventsLoop;
 
-
 var origin, destination, bufferBefore, bufferAfter, preferred
 
+
+var event = {
+  'summary': 'Google I/O 2015',
+  'location': '800 Howard St., San Francisco, CA 94103',
+  'description': 'A chance to hear more about Google\'s developer products.',
+  'start': {
+    'dateTime': '2022-05-28T09:00:00-07:00',
+    'timeZone': 'Europe/Berlin'
+  },
+  'end': {
+    'dateTime': '2022-05-28T17:00:00-07:00',
+    'timeZone': 'Europe/Berlin'
+  },
+};
 
 
 $(window).on("load", function() {
   service = new google.maps.DirectionsService;
+
+  setTimeout(function() {
+    // var request = gapi.client.calendar.events.insert({
+    //   'calendarId': 'primary',
+    //   'resource': event
+    // });
+    // request.execute(function(event) {
+    //   changeSpanText('Event created: ' + event.htmlLink);
+    // });
+  }, 2000);
 });
 
 
@@ -76,10 +99,14 @@ function cleanRoutes(routes) {
 
 
 function formatToText(routesClean) {
+  routesForCal = [];
   for (var i in routesClean) {
+    routeForCal = {};
     route = routesClean[i];
     heading = `Fahrt von ${route["start"]} nach ${route["end"]} - ${route["departureText"]} -> ${route["arrivalText"]} - ${route["durationText"]}`;
-    console.log(heading);
+    // console.log(heading);
+    routeForCal["heading"] = heading;
+    steps = [];
     for (var j in route["steps"]) {
       step = route["steps"][j];
       number = Number(j) + 1;
@@ -88,10 +115,14 @@ function formatToText(routesClean) {
       } else {
         stepText = `${number}) ${step["line"]} ${step["headsign"]} bis '${step["end"]}'  \n${step["departureText"]} -> ${step["arrivalText"]} - ${step["durationText"]}`;
       }
-      console.log(stepText);
+      // console.log(stepText);
+      steps.push(stepText);
     }
-    console.log('\n');
+    routeForCal["steps"] = steps.join("\n\n");
+    // console.log('\n');
+    routesForCal.push(routeForCal);
   }
+  return routesForCal;
 }
 
 
@@ -183,75 +214,104 @@ function veventProcess() {
 
 
   counter++;
-  if (counter == vevents.length) {
+  if (counter == vevents.length - 70) {
     clearInterval(veventsLoop);
-  }
-
-  vevent = vevents[counter - 1];
-  start = new Date(vevent["start"]);
-  today = new Date()
-  today.setMonth(today.getMonth() + 1);
-  end = new Date(vevent["end"]);
-  setArrivalTime = new Date(new Date(start).getTime() - bufferBefore * 60000);
-  setDepartureTime = new Date(new Date(end).getTime() + bufferAfter * 60000);
-  summary = vevent["summary"];
-  veventLocation = vevent["location"];
-  if (destination == '') {
-    destination = veventLocation;
-  }
-  console.log(vevent);
-
-  // console.log(origin);
-  // console.log(destination);
-
-  if (start < today) {
-    delay = 2000;
-    service.route({
-      origin: origin,
-      destination: destination,
-      travelMode: 'TRANSIT',
-      provideRouteAlternatives: false,
-      unitSystem: google.maps.UnitSystem.METRIC,
-      transitOptions: {
-        arrivalTime: start,
-        modes: preferred,
-        routingPreference: 'LESS_WALKING',
-        // departureTime: date.now(),
-      },
-    }, function(response, status) {
-      if (status == "OK") {
-        // console.log(response["routes"]);
-        routes = response["routes"];
-        routesClean = cleanRoutes(routes);
-        formatToText(routesClean);
-      }
-    });
-    service.route({
-      origin: destination,
-      destination: origin,
-      travelMode: 'TRANSIT',
-      provideRouteAlternatives: false,
-      unitSystem: google.maps.UnitSystem.METRIC,
-      transitOptions: {
-        departureTime: setDepartureTime,
-        modes: preferred,
-        routingPreference: 'LESS_WALKING',
-        // departureTime: date.now(),
-      },
-    }, function(response, status) {
-      if (status == "OK") {
-        // console.log(response["routes"]);
-        routes = response["routes"];
-        routesClean = cleanRoutes(routes);
-        formatToText(routesClean);
-      }
-    });
   } else {
-    delay = 0;
+    vevent = vevents[counter - 1];
+    start = new Date(vevent["start"]);
+    today = new Date()
+    today.setMonth(today.getMonth() + 1);
+    end = new Date(vevent["end"]);
+    setArrivalTime = new Date(new Date(start).getTime() - bufferBefore * 60000);
+    setDepartureTime = new Date(new Date(end).getTime() + bufferAfter * 60000);
+    summary = vevent["summary"];
+    veventLocation = vevent["location"];
+    if (destination == '') {
+      destination = veventLocation;
+    }
+    console.log(vevent);
+
+    // console.log(origin);
+    // console.log(destination);
+
+    if (start < today) {
+      delay = 2000;
+      // Hinfahrt
+      getRoute(origin, destination, setArrivalTime, preferred, "arrival");
+      // Rückfahrt
+      getRoute(destination, origin, setDepartureTime, preferred, "departure");
+    } else {
+      delay = 0;
+    }
+
+    veventsLoop = setInterval(veventProcess, delay)
   }
 
-  veventsLoop = setInterval(veventProcess, delay)
 }
+
+
+function getRoute(origin, destination, arrivalTime, preferred, mode) {
+  var transitOptions = {
+    modes: preferred,
+    routingPreference: 'LESS_WALKING',
+  }
+  if (mode == "arrival") {
+    transitOptions["arrivalTime"] = arrivalTime;
+  } else if (mode == "departure") {
+    transitOptions["departureTime"] = arrivalTime;
+  }
+  // console.log(transitOptions);
+
+  service.route({
+    origin: origin,
+    destination: destination,
+    travelMode: 'TRANSIT',
+    provideRouteAlternatives: false,
+    unitSystem: google.maps.UnitSystem.METRIC,
+    transitOptions: transitOptions,
+  }, function(response, status) {
+    if (status == "OK") {
+      // console.log(response["routes"]);
+      routes = response["routes"];
+      routesClean = cleanRoutes(routes);
+      // console.log(routesClean);
+      textsForCal = formatToText(routesClean);
+      // console.log(routesForCal);
+      r = routesClean[0]
+      console.log(textsForCal);
+      t = textsForCal[0];
+      createCalEvent(t["heading"], t["steps"], r["departure"], r["arrival"])
+    }
+  });
+}
+
+
+function createCalEvent(summary, description, start, end) {
+  event = {
+    'summary': summary,
+    'description': description,
+    'start': {
+      'dateTime': start,
+      'timeZone': 'Europe/Berlin'
+    },
+    'end': {
+      'dateTime': end,
+      'timeZone': 'Europe/Berlin'
+    },
+  };
+  console.log(event);
+
+  request = gapi.client.calendar.events.insert({
+    'calendarId': 'primary',
+    'resource': event
+  });
+  request.execute(function(event) {
+    changeSpanText('Event created: ' + event.htmlLink);
+  });
+}
+
+
+
 
 
 function getIcal(url) {
