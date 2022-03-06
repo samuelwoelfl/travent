@@ -188,3 +188,111 @@
   "warnings": [],
   "waypoint_order": [],
 }
+
+
+
+
+
+
+
+
+
+{
+  "distance": {
+    "text": "192 km",
+    "value": 191668
+  },
+  "duration": {
+    "text": "1 Stunde, 35 Minuten",
+    "value": 5700
+  },
+  "end_location": {
+    "lat": 49.4794522,
+    "lng": 8.4694364
+  },
+  "start_location": {
+    "lat": 47.99773769999999,
+    "lng": 7.841504400000001
+  },
+  "travel_mode": "TRANSIT",
+  "instructions": "Zug in Richtung Bln Ostbf.",
+  "maneuver": "",
+  "start_point": {
+    "lat": 47.99773769999999,
+    "lng": 7.841504400000001
+  },
+  "end_point": {
+    "lat": 49.4794522,
+    "lng": 8.4694364
+  },
+  "transit": {
+    "arrival_stop": {
+      "location": {
+        "lat": 49.4794522,
+        "lng": 8.4694364
+      },
+      "name": "Mannheim"
+    },
+    "arrival_time": {
+      "text": "10:30",
+      "time_zone": "Europe/Berlin",
+      "value": "2022-03-05T09:30:58.000Z"
+    },
+    "departure_stop": {
+      "location": {
+        "lat": 47.99773769999999,
+        "lng": 7.841504400000001
+      },
+      "name": "Freiburg(Breisgau) Hbf"
+    },
+    "departure_time": {
+      "text": "08:54",
+      "time_zone": "Europe/Berlin",
+      "value": "2022-03-05T07:54:44.000Z"
+    },
+    "headsign": "Bln Ostbf.",
+    "line": {
+      "agencies": [{
+        "name": "Schweizerische Bundesbahnen SBB",
+        "url": "http://www.sbb.ch/"
+      }],
+      "short_name": "ICE372",
+      "vehicle": {
+        "icon": "https://maps.gstatic.com/mapfiles/transit/iw2/6/rail2.png",
+        "name": "Zug",
+        "type": "HEAVY_RAIL"
+      }
+    },
+    "num_stops": 3
+  }
+}
+
+
+
+
+
+
+
+
+
+1) ICE 104
+  -
+  > Amsterdam Centraal
+Ab 15: 56 Freiburg(Breisgau) Hbf, Gleis 1
+An 16: 58 Karlsruhe Hbf, Gleis 3
+
+2) IC 2163
+  -
+  > Nürnberg Hbf
+Ab 17: 06 Karlsruhe Hbf, Gleis 10
+An 18: 03 Stuttgart Hbf, Gleis 15
+
+
+
+
+
+id = 109298445565 - p3gq2enip6snlo0el80d2fnbrmqckt2o.apps.googleusercontent.com
+schlüssel = GOCSPX - Ux5z - G4q - GChLDP2Q4GqIjIrKcIl
+
+id = 109298445565 - 7 pijc8i1mfpgqtebcolqoio6j14oddmf.apps.googleusercontent.com
+schlüssel = GOCSPX - zZw5WmjGeXw8yJu6vIc3jAXmXx61

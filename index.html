@@ -1,45 +1,102 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="theme-dark">
+<html lang="en" data-theme="theme-light">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Travent</title>
+  <link rel="shortcut icon" href="img/logo/icon.svg">
 
   <link rel="stylesheet" href="/css/main.css">
 
+  <link rel="stylesheet" href="https://anandchowdhary.github.io/ionicons-3-cdn/icons.css" integrity="sha384-+iqgM+tGle5wS+uPwXzIjZS5v6VkqCUV7YQ/e/clzRHAxYbzpUJ+nldylmtBWCP0" crossorigin="anonymous">
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ical.js/1.5.0/ical.min.js" integrity="sha512-0izBc1upGYnrS1u1MX7QR+sjFIxZWxLVdNI7cUoHHCutDr5ENjuQRZuS+v+3NFNGfwHSrPoHzBzED0rV651tGw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha512-Meww2sXqNHxI1+5Dyh/9KAtvI9RZSA4c1K2k5iL02oiPO/RH3Q30L3M1albtqMg50u4gRTYdV4EXOQqXEI336A==" crossorigin="anonymous" referrerpolicy="no-referrer">
   </script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD428BZelApsygZBJJlGJXvmCzBNldPTSY&callback=initMap">
   </script>
   <script src="js/form.js"></script>
-
+  <script src="js/formSave.js"></script>
 
 </head>
 
 <body>
   <div class="wrapper">
-    <h1>travent - automatic travell planner for upcoming events</h1>
-    <form action="javascript:sendData()">
-      <label for="source_cal">Source Calendar URL (share through Google Cal):</label>
-      <input type="text" id="source_cal" name="source_cal" value="">
+    <div class="introduction">
+      <img src="img/logo/logo.svg" alt="">
+      <h1>Automatic public transport planner for upcoming calendar events</h1>
+      <p id="text">Just connect your calendar events and travent will find the perfect connection to go there and back for every event and directly add it to your calendar to block the time.</p>
+    </div>
+    <form action="javascript:sendForm()">
+      <h3>Calendar</h3>
+      <label for="source_cal">Source Calendar URL</label>
+      <input type="text" id="source_cal" name="source_cal" value="" placeholder="e.g. https://splan.hdm-stuttgart.de/splan/ical?lan=de&puid=22&type=config&lc=,F3,b,n,Nf,ov,Dy,xn&oex=false">
+      <span class="description">A link that links to an iCal download - Google Calendar tutorial: Go to your Calendar Settings and click "share publicly", then go down to calendar integrations and copy the link from "public
+        address in iCal format".</span>
 
       <label for="destination_cal">Destination Calendar for the new entries</label>
-      <input type="text" id="destination_cal" name="destination_cal" value="">
+      <input type="text" id="destination_cal" name="destination_cal" value="" placeholder="musterman@gmail.com">
+      <span class="description">The calendar in which the created events should be inserted.</span>
 
-      <label for="start">Start-Location</label>
-      <input type="text" id="start" name="start" value="">
+      <h3>Location</h3>
+      <div class="input_group horizontal">
+        <div class="input">
+          <label for="start">Start-Location</label>
+          <input type="text" id="start" name="start" value="" placeholder="Musterstreet 7a, Stuttgart">
+          <span class="description">Where you start to go to your events - most likely your home</span>
+        </div>
 
-      <label for="end">Destination-Location (optional - needed if not in the calendar event)</label>
-      <input type="text" id="end" name="end" value="" optional="true">
+        <div class="input">
+          <label for="end">Destination-Location (optional)</label>
+          <input type="text" id="end" name="end" value="" optional="true" placeholder="Musterstreet 7a, Stuttgart">
+          <span class="description">The adress of your events. Only needed if not already in the calendar event or to override the calendar event location</span>
+        </div>
+      </div>
 
-      <label for="buffer">Buffer at destination (optional - normal is 5 min)</label>
-      <input type="text" id="buffer" name="buffer" value="" optional="true">
+      <h3 id="optional_settings">Optional Settings</h3>
+      <div class="input_group horizontal">
+        <div class="input">
+          <label for="buffer_before">Buffer before event</label>
+          <input type="text" id="buffer_before" name="buffer_before" value="" optional="true" placeholder="5">
+          <span class="description">If you want to have some buffer for delay or so put it here - normal is 5min</span>
+        </div>
+        <div class="input">
+          <label for="buffer_after">Buffer after event</label>
+          <input type="text" id="buffer_after" name="buffer_after" value="" optional="true" placeholder="5">
+          <span class="description">If it ends later, you have some talks or so - normal is 5min</span>
+        </div>
+      </div>
 
-      <input type="submit" value="Abschicken">
+      <label for="preferred">Preferred transportation mode</label>
+      <select id="preferred" name="preferred">
+        <option value="">Get the best one for me</option>
+        <option value="BUS">Bus</option>
+        <option value="RAIL">All rails: train, tram, light rail, and subway</option>
+        <option value="TRAM">Tram and light rail</option>
+        <option value="TRAIN">Train</option>
+        <option value="SUBWAY">Subway</option>
+      </select>
+      <span class="description">If you prefer to drive by a specific vehicle you can set this here</span>
+
+
+      <input type="submit" value="Create Events">
     </form>
+    <span id="debug_errors"></span>
+
+    <div class="route">
+      <h2 id="route_name"></h2>
+      <p id="route_steps"></p>
+    </div>
   </div>
+
+  <script src="js/customSelect.js"></script>
+
 </body>
 
 </html>

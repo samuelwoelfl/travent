@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 
 @font-face {
   font-family: 'NeueMetana';
@@ -23,19 +24,20 @@
 
 :root {
   /* Font/text values */
-  --heading-font: 'NeueMetana', sans-serif;
+  --heading-font: 'DM Sans', sans-serif;
   --text-font: 'Poppins', sans-serif;
   /* Positioning */
   --content-width: 90%;
-  --content-max-width: 1240px;
+  --content-max-width: 740px;
   --header-height: 75px;
 }
 
 :root[data-theme="theme-dark"] {
   /* Colors: */
-  --primary: #1fe982;
+  --primary: #FFC200;
   --primary-light: #865ee4;
-  --secondary: #e9e81f;
+  --secondary: #865ee4;
+  --error: #eb5449;
   --card-border: #FFFFFF12;
   --bg-emphasize: #3d3a50;
   --bg-dark: #1a1c22;
@@ -47,17 +49,18 @@
 }
 
 :root[data-theme="theme-light"] {
-  --primary: #1fe982;
+  --primary: #FFC200;
   --primary-light: #865ee4;
-  --secondary: #d6c400;
-  --card-border: #00000012;
+  --secondary: #865ee4;
+  --error: #eb5449;
+  --card-border: #DEE2ED;
   --bg-emphasize: #E2E2E94D;
-  --bg-dark: #ffffff;
-  --bg-lighter: #f6f7fa;
+  --bg-dark: #FFFFFF;
+  --bg-lighter: #F8F9FE;
   --text-primary: #161616;
   --text-secondary: #161616B3;
-  --text-tertiary: #9a9a9f;
-  --shadow-color: #0000000f;
+  --text-tertiary: #8C9AB5;
+  --shadow-color: rgba(226, 205, 74, 0.3);
 }
 
 * {
@@ -70,15 +73,26 @@
   scroll-behavior: smooth;
 }
 
+::placeholder {
+  color: var(--text-tertiary);
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--heading-font);
-  color: var(--primary);
-  margin-bottom: 4rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+  margin-top: 3.5rem;
+  width: 100%;
 }
 
 body {
   min-height: 100vh;
-  background-color: var(--bg-dark);
+  padding: 15vh 0;
+  background-color: var(--bg-lighter);
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -90,17 +104,210 @@ body {
   max-width: var(--content-max-width);
 }
 
-label {
-  display: block;
-  margin-bottom: .4%;
+.introduction {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
 
-input {
+.introduction img {
+  width: 40%;
+  padding-bottom: 4rem;
+  border-bottom: 1px solid var(--card-border);
+}
+
+h1 {
+  color: var(--text-primary);
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+p#text {
+  margin-bottom: 6rem;
+  color: var(--text-tertiary);
+  text-align: center;
+  width: 80%;
+}
+
+label {
+  display: block;
+  margin-bottom: 1vh;
+  font-weight: 500;
+  font-size: .9rem;
+  font-family: 'DM Sans';
+}
+
+form>* {
+  width: 100%;
+}
+
+input, select, option {
   display: block;
   width: 100%;
-  margin-bottom: 3%;
-  padding: 12px;
-  background-color: var(--bg-lighter);
+  margin-bottom: 3vh;
+  padding: 12px 15px;
+  background-color: var(--bg-dark);
   border: 1px solid var(--card-border);
-  border-radius: 5px;
+  border-radius: 10px;
+  font-size: .9rem;
+  transition: 100ms ease-in;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border: 1px solid var(--primary);
+  box-shadow: 0px 0px 0 3px var(--shadow-color);
+}
+
+.input_group.horizontal {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.input_group.horizontal>* {
+  width: 49%;
+  /* min-width: 40%; */
+}
+
+span.description {
+  display: block;
+  margin-top: -2.5vh;
+  margin-bottom: 2.5vh;
+  color: var(--text-tertiary);
+  font-size: .8rem;
+}
+
+/* -------------------------- Custom Select -------------------------- */
+.select-hidden {
+  display: none;
+  visibility: hidden;
+}
+
+.select {
+  cursor: pointer;
+  position: relative;
+  font-family: "Poppins", sans-serif;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.select-styled {
+  color: var(--text-primary);
+  transition: all 250ms ease;
+  position: relative;
+  margin-bottom: 3vh;
+  padding: 12px 15px;
+  background-color: var(--bg-dark);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  font-size: .9rem;
+}
+
+.select-styled::after {
+  content: "";
+  font-family: "Ionicons";
+  font-size: 17px;
+  display: inline-block;
+  color: var(--primary);
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all 250ms ease-in;
+}
+
+.select-styled:hover {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.select-styled:hover::after {
+  color: #fff;
+}
+
+.select-styled:active, .select-styled.active {
+  background-color: var(--primary);
+  color: #fff;
+  box-shadow: 0px 0px 0 3px var(--shadow-color);
+}
+
+.select-styled:active::after, .select-styled.active::after {
+  color: #fff;
+  transform: rotate(180deg);
+  top: 25%;
+}
+
+.select-options {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: 0;
+  z-index: 999;
+  display: none;
+  margin: 0.45rem 0 0 0;
+  padding: 0.4rem 0;
+  list-style: none;
+  border-radius: 10px;
+  background-color: var(--bg-dark);
+  box-shadow: 0 10px 16px rgba(68, 104, 194, 0.18);
+}
+
+.select-options li {
+  margin: 2px 5px;
+  padding: 10px 15px;
+  transition: all 100ms ease-in;
+  color: var(--text-primary);
+  border-radius: 8px;
+  font-size: .9rem;
+}
+
+.select-options li:hover {
+  background-color: #ECEDF3;
+}
+
+.select-options li[rel=hide] {
+  display: none;
+}
+
+/* -------------------------- Custom Select End -------------------------- */
+input[type="submit"] {
+  background-color: var(--primary);
+  color: #fff;
+  border: none;
+  margin-top: 4rem;
+  width: 100%;
+}
+
+input[type="submit"]:hover {
+  background-color: var(--primary-light);
+  cursor: pointer;
+}
+
+input.error, textarea.error {
+  border-color: var(--error);
+}
+
+.error_message:before {
+  content: "⚠";
+  margin-right: 3px;
+  font-size: .9rem;
+}
+
+.error_message {
+  color: var(--error);
+  font-size: 0.8rem;
+  margin-top: -2.6vh;
+  margin-bottom: 3vh;
+}
+
+h3#optional_settings {
+  margin-top: 1.7rem;
 }
