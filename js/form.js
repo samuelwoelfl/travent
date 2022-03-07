@@ -163,9 +163,9 @@ function veventProcess() {
     if (start < today) {
       delay = 3000;
       // Hinfahrt
-      // getRoute(origin, destination, setArrivalTime, preferred, "arrival");
+      getRoute(origin, destination, setArrivalTime, preferred, "arrival");
       // Rückfahrt
-      // getRoute(destination, origin, setDepartureTime, preferred, "departure");
+      getRoute(destination, origin, setDepartureTime, preferred, "departure");
     } else {
       delay = 0;
     }
