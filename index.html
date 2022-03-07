@@ -222,6 +222,7 @@
         authorizeButton.style.display = 'none';
         signoutButton.style.display = 'flex';
         changeSpanText("🎉 You have been logged in succesfully");
+        console.log(gapi.client.calendar.calendarList.list());
       } else {
         authorizeButton.style.display = 'flex';
         signoutButton.style.display = 'none';

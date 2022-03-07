@@ -38,16 +38,18 @@ $(window).on("load", function() {
   $startInput = $('input#start');
   $endInput = $('input#end');
 
-  $startInput.on('input', function() {
-    value = $startInput.val();
-    // var autocomplete = autocompleteService.Autocomplete(value);
-    if (requests % 5 == 0) {
-      // var autocomplete = new google.maps.places.Autocomplete($startInput.get(0), options);
-      var searchBox = new google.maps.places.SearchBox($startInput.get(0), options);
-    }
-    requests++
-    // console.log(autocomplete);
-  });
+  var searchBoxStart = new google.maps.places.SearchBox($startInput.get(0), options);
+  var searchBoxEnd = new google.maps.places.SearchBox($endInput.get(0), options);
+  // $startInput.on('input', function() {
+  //   value = $startInput.val();
+  //   // var autocomplete = autocompleteService.Autocomplete(value);
+  //   if (requests % 5 == 0) {
+  //     // var autocomplete = new google.maps.places.Autocomplete($startInput.get(0), options);
+  //
+  //   }
+  //   requests++
+  //   // console.log(autocomplete);
+  // });
 });
 
 

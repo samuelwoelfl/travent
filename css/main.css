@@ -304,7 +304,7 @@ span.description {
 }
 
 .select-options li:hover {
-  background-color: #ECEDF3;
+  background-color: #f4f4fb;
 }
 
 .select-options li[rel=hide] {
@@ -396,11 +396,41 @@ form .container .left {
 }
 
 .pac-container {
-  box-shadow: 0 10px 16px rgba(68, 104, 194, 0.18);
+  box-shadow: 0 5px 16px rgba(68, 104, 194, 0.15);
   border-radius: 10px;
   transition: all 250ms ease;
-  padding: 12px 12px;
+  padding: .4rem 0px;
   background-color: var(--bg-dark);
   border: 1px solid var(--card-border);
   font-size: .9rem;
+  margin-top: .4rem;
+}
+
+.pac-item {
+  margin: 2px 5px;
+  padding: 10px 15px;
+  transition: all 100ms ease-in;
+  color: var(--text-primary);
+  border-radius: 8px;
+  font-size: .9rem;
+  border: none;
+}
+
+.pac-item:hover {
+  background-color: #f4f4fb;
+  cursor: pointer;
+}
+
+.pac-item * {
+  font-size: .9rem;
+}
+
+.pac-matched {
+  font-weight: 500;
+  font-size: .9rem;
+}
+
+.pac-item-query {
+  font-size: .9rem;
+  font-weight: 400;
 }
