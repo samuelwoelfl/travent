@@ -9,6 +9,7 @@
   <link rel="shortcut icon" href="img/logo/icon.svg">
 
   <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/cookies.css">
 
   <link rel="stylesheet" href="https://anandchowdhary.github.io/ionicons-3-cdn/icons.css" integrity="sha384-+iqgM+tGle5wS+uPwXzIjZS5v6VkqCUV7YQ/e/clzRHAxYbzpUJ+nldylmtBWCP0" crossorigin="anonymous">
 
@@ -16,17 +17,78 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous" referrerpolicy="no-referrer">
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/ical.js/1.5.0/ical.min.js" integrity="sha512-0izBc1upGYnrS1u1MX7QR+sjFIxZWxLVdNI7cUoHHCutDr5ENjuQRZuS+v+3NFNGfwHSrPoHzBzED0rV651tGw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ical.js/1.5.0/ical.min.js" integrity="sha512-0izBc1upGYnrS1u1MX7QR+sjFIxZWxLVdNI7cUoHHCutDr5ENjuQRZuS+v+3NFNGfwHSrPoHzBzED0rV651tGw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js" integrity="sha512-Meww2sXqNHxI1+5Dyh/9KAtvI9RZSA4c1K2k5iL02oiPO/RH3Q30L3M1albtqMg50u4gRTYdV4EXOQqXEI336A==" crossorigin="anonymous" referrerpolicy="no-referrer">
   </script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD428BZelApsygZBJJlGJXvmCzBNldPTSY&callback=initMap">
+  <!-- <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD428BZelApsygZBJJlGJXvmCzBNldPTSY&callback=initMap">
+  </script> -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD428BZelApsygZBJJlGJXvmCzBNldPTSY&libraries=places&callback=initMap">
   </script>
   <script src="js/form.js"></script>
   <script src="js/formSave.js"></script>
+  <script src="js/cookies.js"></script>
 
 </head>
 
 <body>
+
+  <div class="cookie_toggle_modal">
+    <span class="icon">🍪</span>
+    <div class="hidden">
+      <span class="text">Cookie&nbsp;Einstellungen:</span>
+      <button id="toogle_cookies_button" class="primary" type="button" name="button">Cookies akzeptieren</button>
+    </div>
+  </div>
+
+  <div id="cookie_banner" class="start_banner" style="display:none">
+    <div class="info">
+      <span class="icon">🍪</span>
+      <p>Für eine optimale Darstellung und Funktion verwendet unsere Website Cookies. <br>Unsere Cookies sind rein funktional und werden nicht weiter verarbeitet.</p>
+    </div>
+    <button id="denie_cookies" class="secondary" type="button" name="button">Ablehnen</button>
+    <button id="accept_cookies" class="primary" type="button" name="button">Akzeptieren</button>
+  </div>
+
+  <div id="accepted_banner" class="start_banner" style="display:none" show-duration="4000">
+    <div class="info">
+      <span class="icon">🧙‍♂️</span>
+      <p>Gute Wahl! Unsere Magier arbeiten schon daran die Experiece an dich anzupassen ✨</p>
+    </div>
+    <div class="icons">
+      <svg class="progress-ring banner_close_button" width="32" height="32">
+        <circle class="progress-ring_circle" stroke-width="2" fill="transparent" r="10" cx="16" cy="16" />
+        <line stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round" x1="19" y1="13" x2="13" y2="19"></line>
+        <line stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round" x1="13" y1="13" x2="19" y2="19"></line>
+      </svg>
+    </div>
+  </div>
+
+  <div id="denied_banner" class="start_banner" style="display:none" show-duration="5000">
+    <div class="info">
+      <span class="icon">👍</span>
+      <p>Okay, du kannst deine Präferenz jederzeit rechts unten beim Cookie-Icon ändern.</p>
+    </div>
+    <svg class="progress-ring banner_close_button" width="32" height="32">
+      <circle class="progress-ring_circle" stroke-width="2" fill="transparent" r="10" cx="16" cy="16" />
+      <line stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round" x1="19" y1="13" x2="13" y2="19"></line>
+      <line stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round" x1="13" y1="13" x2="19" y2="19"></line>
+    </svg>
+  </div>
+
+  <div id="welcome_banner" class="start_banner" style="display:none" show-duration="3500">
+    <div class="info">
+      <span class="icon">👋</span>
+      <p>Willkommen zurück!</p>
+    </div>
+    <svg class="progress-ring banner_close_button" width="32" height="32">
+      <circle class="progress-ring_circle" stroke-width="2" fill="transparent" r="10" cx="16" cy="16" />
+      <line stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round" x1="19" y1="13" x2="13" y2="19"></line>
+      <line stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round" x1="13" y1="13" x2="19" y2="19"></line>
+    </svg>
+  </div>
+
+
   <div class="wrapper">
     <div class="introduction">
       <img src="img/logo/logo.svg" alt="">

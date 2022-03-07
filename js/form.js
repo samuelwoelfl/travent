@@ -6,35 +6,190 @@ var veventsLoop;
 
 var origin, destination, bufferBefore, bufferAfter, preferred
 
+// const center = {
+//   lat: 50.064192,
+//   lng: -130.605469
+// };
+//
+//
+// const defaultBounds = {
+//   north: center.lat + 2,
+//   south: center.lat - 2,
+//   east: center.lng + 2,
+//   west: center.lng - 2,
+// };
 
-var event = {
-  'summary': 'Google I/O 2015',
-  'location': '800 Howard St., San Francisco, CA 94103',
-  'description': 'A chance to hear more about Google\'s developer products.',
-  'start': {
-    'dateTime': '2022-05-28T09:00:00-07:00',
-    'timeZone': 'Europe/Berlin'
+const options = {
+  // bounds: defaultBounds,
+  componentRestrictions: {
+    country: "de"
   },
-  'end': {
-    'dateTime': '2022-05-28T17:00:00-07:00',
-    'timeZone': 'Europe/Berlin'
-  },
+  fields: ["address_components", "geometry", "icon", "name", "types"],
+  strictBounds: false,
+  types: ["education"],
 };
 
-
+let requests = 5;
 $(window).on("load", function() {
   service = new google.maps.DirectionsService;
+  // autocompleteService = new google.maps.places;
+  // autocompleteService = new google.maps.places.AutocompletionRequest;
 
-  setTimeout(function() {
-    // var request = gapi.client.calendar.events.insert({
-    //   'calendarId': 'primary',
-    //   'resource': event
-    // });
-    // request.execute(function(event) {
-    //   changeSpanText('Event created: ' + event.htmlLink);
-    // });
-  }, 2000);
+  $startInput = $('input#start');
+  $endInput = $('input#end');
+
+  $startInput.on('input', function() {
+    value = $startInput.val();
+    // var autocomplete = autocompleteService.Autocomplete(value);
+    if (requests % 5 == 0) {
+      // var autocomplete = new google.maps.places.Autocomplete($startInput.get(0), options);
+      var searchBox = new google.maps.places.SearchBox($startInput.get(0), options);
+    }
+    requests++
+    // console.log(autocomplete);
+  });
 });
+
+
+function getIcal(url) {
+  // read text from URL location
+  var request = new XMLHttpRequest();
+  request.open('GET', url, true);
+  request.send(null);
+  request.onreadystatechange = function() {
+    if (request.readyState === 4 && request.status === 200) {
+      var type = request.getResponseHeader('Content-Type');
+      ical = request.responseText;
+      // return request.responseText;
+    }
+  }
+}
+
+
+function sendData() {
+
+  vevents = [];
+  calURL = $("#source_cal").val();
+  getIcal(calURL);
+  setTimeout(function() {
+    var jcalData = ICAL.parse(ical);
+    for (var i in jcalData[2]) {
+      veventData = jcalData[2][i];
+      if (veventData[0] == "vevent") {
+        veventData = veventData[1];
+        vevent = {
+          "start": veventData[1][3],
+          "end": veventData[2][3],
+          "summary": veventData[3][3],
+          "location": veventData[5][3],
+        }
+        vevents.push(vevent);
+      }
+    }
+
+
+    origin = $("#start").val();
+    destination = $("#end").val();
+    bufferBefore = $("#buffer_before").val();
+    if (bufferBefore == "") {
+      bufferBefore = 5;
+    }
+    bufferAfter = $("#buffer_after").val();
+    if (bufferAfter == "") {
+      bufferAfter = 5;
+    }
+    preferred = $("#preferred").val();
+    if (preferred == "") {
+      preferred = [];
+    } else {
+      preferred = [preferred];
+    }
+    console.log(preferred);
+
+    try {
+      veventProcess(vevents);
+    } catch (e) {
+      console.log(e);
+      $("#debug_errors").html(e);
+    }
+
+
+  }, 500);
+
+}
+
+
+function veventProcess() {
+  clearInterval(veventsLoop);
+
+  counter++;
+  if (counter == vevents.length - 70) {
+    clearInterval(veventsLoop);
+  } else {
+    vevent = vevents[counter - 1];
+    start = new Date(vevent["start"]);
+    today = new Date()
+    today.setMonth(today.getMonth() + 1);
+    end = new Date(vevent["end"]);
+    setArrivalTime = new Date(new Date(start).getTime() - bufferBefore * 60000);
+    setDepartureTime = new Date(new Date(end).getTime() + bufferAfter * 60000);
+    summary = vevent["summary"];
+    veventLocation = vevent["location"];
+    if (destination == '') {
+      destination = veventLocation;
+    }
+    console.log(vevent);
+
+    if (start < today) {
+      delay = 2000;
+      // Hinfahrt
+      getRoute(origin, destination, setArrivalTime, preferred, "arrival");
+      // Rückfahrt
+      getRoute(destination, origin, setDepartureTime, preferred, "departure");
+    } else {
+      delay = 0;
+    }
+
+    veventsLoop = setInterval(veventProcess, delay)
+  }
+
+}
+
+
+function getRoute(origin, destination, arrivalTime, preferred, mode) {
+  var transitOptions = {
+    modes: preferred,
+    routingPreference: 'LESS_WALKING',
+  }
+  if (mode == "arrival") {
+    transitOptions["arrivalTime"] = arrivalTime;
+  } else if (mode == "departure") {
+    transitOptions["departureTime"] = arrivalTime;
+  }
+
+  console.log(service);
+  service.route({
+    origin: origin,
+    destination: destination,
+    travelMode: 'TRANSIT',
+    provideRouteAlternatives: false,
+    unitSystem: google.maps.UnitSystem.METRIC,
+    transitOptions: transitOptions,
+  }, function(response, status) {
+    if (status == "OK") {
+      // console.log(response["routes"]);
+      routes = response["routes"];
+      routesClean = cleanRoutes(routes);
+      // console.log(routesClean);
+      textsForCal = formatToText(routesClean);
+      // console.log(routesForCal);
+      r = routesClean[0]
+      console.log(textsForCal);
+      t = textsForCal[0];
+      createCalEvent(t["heading"], t["steps"], r["departure"], r["arrival"])
+    }
+  });
+}
 
 
 function cleanRoutes(routes) {
@@ -154,138 +309,6 @@ function meterToText(d) {
 }
 
 
-
-function sendData() {
-
-  vevents = [];
-  calURL = $("#source_cal").val();
-  getIcal(calURL);
-  setTimeout(function() {
-    var jcalData = ICAL.parse(ical);
-    for (var i in jcalData[2]) {
-      veventData = jcalData[2][i];
-      if (veventData[0] == "vevent") {
-        veventData = veventData[1];
-        vevent = {
-          "start": veventData[1][3],
-          "end": veventData[2][3],
-          "summary": veventData[3][3],
-          "location": veventData[5][3],
-        }
-        vevents.push(vevent);
-      }
-    }
-
-
-    origin = $("#start").val();
-    destination = $("#end").val();
-    bufferBefore = $("#buffer_before").val();
-    if (bufferBefore == "") {
-      bufferBefore = 5;
-    }
-    bufferAfter = $("#buffer_after").val();
-    if (bufferAfter == "") {
-      bufferAfter = 5;
-    }
-    preferred = $("#preferred").val();
-    console.log(preferred);
-    if (preferred == "") {
-      preferred = [];
-    } else {
-      preferred = [preferred];
-    }
-    console.log(preferred);
-
-    try {
-      veventProcess(vevents);
-    } catch (e) {
-      console.log(e);
-      $("#debug_errors").html(e);
-    }
-
-
-  }, 500);
-
-}
-
-
-function veventProcess() {
-  clearInterval(veventsLoop);
-
-
-  counter++;
-  if (counter == vevents.length - 70) {
-    clearInterval(veventsLoop);
-  } else {
-    vevent = vevents[counter - 1];
-    start = new Date(vevent["start"]);
-    today = new Date()
-    today.setMonth(today.getMonth() + 1);
-    end = new Date(vevent["end"]);
-    setArrivalTime = new Date(new Date(start).getTime() - bufferBefore * 60000);
-    setDepartureTime = new Date(new Date(end).getTime() + bufferAfter * 60000);
-    summary = vevent["summary"];
-    veventLocation = vevent["location"];
-    if (destination == '') {
-      destination = veventLocation;
-    }
-    console.log(vevent);
-
-    // console.log(origin);
-    // console.log(destination);
-
-    if (start < today) {
-      delay = 2000;
-      // Hinfahrt
-      getRoute(origin, destination, setArrivalTime, preferred, "arrival");
-      // Rückfahrt
-      getRoute(destination, origin, setDepartureTime, preferred, "departure");
-    } else {
-      delay = 0;
-    }
-
-    veventsLoop = setInterval(veventProcess, delay)
-  }
-
-}
-
-
-function getRoute(origin, destination, arrivalTime, preferred, mode) {
-  var transitOptions = {
-    modes: preferred,
-    routingPreference: 'LESS_WALKING',
-  }
-  if (mode == "arrival") {
-    transitOptions["arrivalTime"] = arrivalTime;
-  } else if (mode == "departure") {
-    transitOptions["departureTime"] = arrivalTime;
-  }
-  // console.log(transitOptions);
-
-  service.route({
-    origin: origin,
-    destination: destination,
-    travelMode: 'TRANSIT',
-    provideRouteAlternatives: false,
-    unitSystem: google.maps.UnitSystem.METRIC,
-    transitOptions: transitOptions,
-  }, function(response, status) {
-    if (status == "OK") {
-      // console.log(response["routes"]);
-      routes = response["routes"];
-      routesClean = cleanRoutes(routes);
-      // console.log(routesClean);
-      textsForCal = formatToText(routesClean);
-      // console.log(routesForCal);
-      r = routesClean[0]
-      console.log(textsForCal);
-      t = textsForCal[0];
-      createCalEvent(t["heading"], t["steps"], r["departure"], r["arrival"])
-    }
-  });
-}
-
-
 function createCalEvent(summary, description, start, end) {
   event = {
     'summary': summary,
@@ -310,23 +333,6 @@ function createCalEvent(summary, description, start, end) {
   });
 }
 
-
-
-
-
-function getIcal(url) {
-  // read text from URL location
-  var request = new XMLHttpRequest();
-  request.open('GET', url, true);
-  request.send(null);
-  request.onreadystatechange = function() {
-    if (request.readyState === 4 && request.status === 200) {
-      var type = request.getResponseHeader('Content-Type');
-      ical = request.responseText;
-      // return request.responseText;
-    }
-  }
-}
 
 
 

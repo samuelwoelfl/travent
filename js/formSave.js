@@ -10,10 +10,11 @@ $(document).ready(function() {
   fillInputs($inputs);
 
   $inputs.on('input', function() {
-    console.log('change');
     let name = $(this).attr('name');
     let value = $(this).val();
-    Cookies.set(name + '-inputCookie', value);
+    if (Cookies.get('cookiesAccepted') == 'true') {
+      Cookies.set(name + '-inputCookie', value);
+    }
     validateInput(this);
   });
 
@@ -36,7 +37,6 @@ $(document).ready(function() {
   //     return 'attention'; // Any other browser
   //   }
   // });
-
 
 });
 

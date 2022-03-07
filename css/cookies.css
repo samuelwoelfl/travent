@@ -1,0 +1,141 @@
+.start_banner {
+  position: fixed;
+  z-index: 100;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: var(--content-width);
+  max-width: 1200px;
+  left: calc((100vw - 1200px)/2);
+  bottom: 2vh;
+  padding: 1% 1.5%;
+  background-color: var(--bg-dark);
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 5px 16px rgba(68, 104, 194, 0.15);
+  transition: transform .15s ease-out;
+}
+
+.start_banner:hover {
+  transform: scale(1.02);
+}
+
+.start_banner .info {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  width: 80%;
+}
+
+.start_banner span.icon {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.start_banner .info p {
+  color: var(--text-primary);
+  margin-left: 2%;
+}
+
+.start_banner button#denie_cookies {
+  margin-right: 10px;
+}
+
+.banner_close_button:hover {
+  cursor: pointer;
+}
+
+.progress-ring_circle {
+  stroke-dasharray: 62.8;
+  stroke-dashoffset: 62.8;
+  animation: dash;
+  animation-duration: 2.5s;
+  animation-timing-function: linear;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  stroke: var(--text-primary);
+  min-width: 32px;
+}
+
+@keyframes dash {
+  from {
+    stroke-dashoffset: 0;
+  }
+
+  to {
+    stroke-dashoffset: 62.8;
+  }
+}
+
+.custom-cursor {
+  position: fixed;
+  z-index: 200;
+  width: 50px;
+  height: 50px;
+  border-radius: 100px;
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+h3 {
+  margin-top: 4%;
+  margin-bottom: 1%;
+}
+
+.cookie_toggle_modal {
+  position: fixed;
+  right: 2vh;
+  bottom: 2vh;
+  padding: .8%;
+  background-color: var(--bg-dark);
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  transition: .3s ease;
+  z-index: 90;
+}
+
+.cookie_toggle_modal {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.cookie_toggle_modal .hidden {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 0px;
+  height: 100%;
+  transition: .3s ease;
+  overflow: hidden;
+  margin-left: 3%;
+}
+
+.cookie_toggle_modal .hidden button {
+  white-space: nowrap;
+  width: 250px;
+  margin-left: 5%;
+}
+
+.cookie_toggle_modal:hover {
+  background-color: var(--bg-lighter);
+  cursor: pointer;
+}
+
+.cookie_toggle_modal:hover>.hidden {
+  max-width: 420px;
+}
+
+#toogle_cookies_button {
+  padding: 3% 5%;
+}
