@@ -48,7 +48,7 @@ $(document).ready(function() {
       $cookieBanner.fadeIn(100);
     }, 2000);
   } else {
-    $toggleCookiesButton.html('Cookie-Wahl zurÃ¼cksetzen');
+    $toggleCookiesButton.html('Reset cookie choice');
     if (!welcomeShown) {
       showToast($welcomeBanner);
       Cookies.set('welcomeShown', true, {
@@ -66,7 +66,7 @@ $(document).ready(function() {
   $denieCookiesButton.click(function() {
     $cookieBanner.fadeOut(100);
     showToast($deniedBanner);
-    $toggleCookiesButton.html('Cookies akzeptieren');
+    $toggleCookiesButton.html('Accept Cookies');
   });
 
   $toggleCookiesButton.click(function() {
@@ -87,13 +87,13 @@ $(document).ready(function() {
 
 function acceptCookies() {
   Cookies.set('cookiesAccepted', 'true');
-  $toggleCookiesButton.html('Cookie-Wahl zurücksetzen');
+  $toggleCookiesButton.html('Reset cookie choice');
   showToast($acceptedBanner);
 }
 
 function resetCookies() {
   deleteAllCookies();
-  $toggleCookiesButton.html('Cookies akzeptieren');
+  $toggleCookiesButton.html('Accept Cookies');
   showToast($deniedBanner);
 }
 

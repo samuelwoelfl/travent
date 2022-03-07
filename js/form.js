@@ -35,6 +35,9 @@ $(window).on("load", function() {
   // autocompleteService = new google.maps.places;
   // autocompleteService = new google.maps.places.AutocompletionRequest;
 
+  $submitButton = $('button[type="submit"]');
+  $submitButtonText = $('button[type="submit"] .text');
+
   $startInput = $('input#start');
   $endInput = $('input#end');
 
@@ -70,9 +73,13 @@ function getIcal(url) {
 
 function sendData() {
 
+  $submitButton.addClass("loading");
+  $submitButtonText.html("Working...");
+
   vevents = [];
   calURL = $("#source_cal").val();
   getIcal(calURL);
+  $submitButtonText.html("Read iCal ...");
   setTimeout(function() {
     var jcalData = ICAL.parse(ical);
     for (var i in jcalData[2]) {
@@ -109,6 +116,7 @@ function sendData() {
     console.log(preferred);
 
     try {
+      $submitButtonText.html("Search routes and create events ...");
       veventProcess(vevents);
     } catch (e) {
       console.log(e);
@@ -125,9 +133,19 @@ function veventProcess() {
   clearInterval(veventsLoop);
 
   counter++;
-  if (counter == vevents.length - 70) {
+  maximum = vevents.length - 65;
+  if (counter == maximum) {
     clearInterval(veventsLoop);
+    counter = 0;
+    $submitButtonText.html("Done");
+    $submitButton.removeClass("loading");
+    $submitButton.addClass("done");
+    setTimeout(function() {
+      $submitButton.removeClass("done");
+      $submitButtonText.html("Create Events");
+    }, 2500);
   } else {
+    $submitButtonText.html(`Search routes and create events (${Math.round(counter/maximum*100)}% - ${counter}/${maximum-1})`);
     vevent = vevents[counter - 1];
     start = new Date(vevent["start"]);
     today = new Date()
@@ -143,11 +161,11 @@ function veventProcess() {
     console.log(vevent);
 
     if (start < today) {
-      delay = 2000;
+      delay = 3000;
       // Hinfahrt
-      getRoute(origin, destination, setArrivalTime, preferred, "arrival");
+      // getRoute(origin, destination, setArrivalTime, preferred, "arrival");
       // Rückfahrt
-      getRoute(destination, origin, setDepartureTime, preferred, "departure");
+      // getRoute(destination, origin, setDepartureTime, preferred, "departure");
     } else {
       delay = 0;
     }
@@ -331,7 +349,7 @@ function createCalEvent(summary, description, start, end) {
     'resource': event
   });
   request.execute(function(event) {
-    changeSpanText('Event created: ' + event.htmlLink);
+    // changeSpanText('Event created: ' + event.htmlLink);
   });
 }
 

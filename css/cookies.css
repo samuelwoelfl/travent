@@ -118,7 +118,7 @@ h3 {
   height: 100%;
   transition: .3s ease;
   overflow: hidden;
-  margin-left: 3%;
+  /* margin-left: 3%; */
 }
 
 .cookie_toggle_modal .hidden button {
@@ -130,10 +130,16 @@ h3 {
 .cookie_toggle_modal:hover {
   background-color: var(--bg-lighter);
   cursor: pointer;
+  padding: .6%;
+  padding-left: 1%;
 }
 
 .cookie_toggle_modal:hover>.hidden {
-  max-width: 420px;
+  max-width: 450px;
+}
+
+.cookie_toggle_modal:hover>.icon {
+  margin-right: 3%;
 }
 
 #toogle_cookies_button {

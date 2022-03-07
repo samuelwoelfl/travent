@@ -53,6 +53,7 @@
   --primary-light: #f7ae02;
   --secondary: #865ee4;
   --error: #eb5449;
+  --done: #2bd650;
   --card-border: #DEE2ED;
   --bg-emphasize: #E2E2E94D;
   --bg-dark: #FFFFFF;
@@ -156,7 +157,7 @@ button.secondary:hover {
   background-color: var(--bg-dark);
 }
 
-button:active, input[type=submit]:active {
+button:active, button:active {
   transform: scale(0.95);
 }
 
@@ -339,15 +340,29 @@ span.description {
   box-shadow: 0px 0px 0 3px var(--shadow-color);
 }
 
-input[type="submit"] {
+button[type="submit"] {
   background-color: var(--primary);
+  position: relative;
   color: #fff;
   border: none;
-  margin-top: 4rem;
+  margin-top: 5rem;
   width: 100%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  font-size: .9rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  transition: .2s ease;
+  transition-delay: .1s;
 }
 
-input[type="submit"]:hover {
+button[type="submit"] .text {
+  color: #fff;
+}
+
+button[type="submit"]:hover {
   background-color: var(--primary-light);
   cursor: pointer;
 }
@@ -433,4 +448,110 @@ form .container .left {
 .pac-item-query {
   font-size: .9rem;
   font-weight: 400;
+}
+
+/* Loading States */
+button[type="submit"] * {
+  transition: .2s ease;
+}
+
+button[type="submit"].loading {
+  background-color: var(--card-border);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+button[type="submit"].loading .text {
+  color: var(--text-secondary);
+  margin-left: 2%;
+}
+
+.loader {
+  display: none;
+}
+
+button[type="submit"].loading .loader {
+  display: block;
+}
+
+button[type="submit"].done {
+  background-color: var(--done);
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+button[type="submit"].done * {
+  color: #fff;
+}
+
+button[type="submit"] .done {
+  display: none;
+}
+
+button[type="submit"].done .done {
+  display: block;
+  margin-right: 3%;
+}
+
+.loader .container {
+  /* width: 60px; */
+  display: flex;
+}
+
+.ball {
+  width: 5px;
+  height: 5px;
+  margin: 10px 3px;
+  margin-top: -1px;
+  border-radius: 50px;
+  background-color: var(--text-secondary);
+}
+
+.ball:nth-child(1) {
+  animation: right 1s infinite ease-in-out;
+}
+
+.ball:nth-child(2) {
+  animation: right 1s infinite ease-in-out;
+  animation-delay: .2s;
+}
+
+.ball:nth-child(3) {
+  animation: right 1s infinite ease-in-out;
+  animation-delay: .4s;
+}
+
+.ball:nth-child(4) {
+  animation: right 1s infinite ease-in-out;
+  animation-delay: .6s;
+}
+
+.ball:nth-child(5) {
+  animation: right 1s infinite ease-in-out;
+  animation-delay: .8s;
+}
+
+@keyframes right {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(8px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
