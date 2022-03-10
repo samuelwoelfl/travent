@@ -218,6 +218,10 @@ span.description {
   font-size: .8rem;
 }
 
+.select-styled.subcalendar {
+  margin-top: -2.4vh;
+}
+
 /* -------------------------- Custom Select -------------------------- */
 .select-hidden {
   display: none;
@@ -312,6 +316,14 @@ span.description {
   display: none;
 }
 
+span.color_box {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  border-radius: 50px;
+  margin-right: 11px;
+}
+
 /* -------------------------- Custom Select End -------------------------- */
 .google_button {
   text-align: center;
@@ -386,6 +398,10 @@ input.error, textarea.error {
 
 h3#optional_settings {
   margin-top: 1.7rem;
+}
+
+h3#location {
+  margin-top: 8%;
 }
 
 form {
@@ -554,4 +570,13 @@ button[type="submit"].done .done {
   100% {
     transform: translateY(0px);
   }
+}
+
+.disclaimer {
+  text-align: center;
+  width: 70%;
+  margin: 0 auto;
+  margin-top: 4vh;
+  color: var(--text-tertiary);
+  font-size: .9rem;
 }

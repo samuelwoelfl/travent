@@ -102,6 +102,7 @@
       <h1>Automatic public transport planner for upcoming calendar events</h1>
       <p id="text">Just connect your calendar events and travent will find the perfect connection to go there and back for every event and directly add it to your calendar to block the time.</p>
     </div>
+
     <form action="javascript:sendForm()">
       <h3>Calendar</h3>
       <label for="source_cal">Source Calendar URL</label>
@@ -113,15 +114,15 @@
       <div class="container">
         <div class="left">
           <div class="google_button" id="authorize_button"><img class="icon" src="img/google-icon-logo-svg-vector.svg" width="18px" height="18px" alt=""><span class="text">Connect your Google Calendar</span></div>
-          <div class="google_button" id="signout_button" style="display: none;"><img class="icon" src="img/google-icon-logo-svg-vector.svg" width="18px" height="18px" alt=""><span class="text">Sign Out of Google Calendar</span></div>
-
-          <!-- <input type="text" id="destination_cal" name="destination_cal" value="" placeholder="musterman@gmail.com"> -->
-          <span class="description">The calendar in which the created events should be inserted.</span>
+          <div class="google_button" id="signout_button" style="display: none;"><img class="icon" src="img/google-icon-logo-svg-vector.svg" width="18px" height="18px" alt=""><span class="text">Sign Out of Account</span></div>
         </div>
         <span id="google_message" class="left"></span>
       </div>
+      <select id="subcalendar" name="subcalendar" style="display:none">
+      </select>
+      <span class="description">The calendar in which the created events should be inserted.</span>
 
-      <h3>Location</h3>
+      <h3 id="location">Location</h3>
       <div class="input_group horizontal">
         <div class="input">
           <label for="start">Start-Location</label>
@@ -176,6 +177,9 @@
       </button>
 
     </form>
+    <p class="disclaimer">Disclaimer: It only works for one month in the
+      future
+      right now, because of Google Maps API limitations.</p>
 
 
 
@@ -241,13 +245,41 @@
         authorizeButton.style.display = 'none';
         signoutButton.style.display = 'flex';
         changeSpanText("🎉 You have been logged in succesfully");
-        console.log(gapi.client.calendar.calendarList.list());
+        listCalends();
       } else {
         authorizeButton.style.display = 'flex';
         signoutButton.style.display = 'none';
         changeSpanText("");
+        $("#subcalendar").empty();
+        $("#subcalendar").unwrap("div.select");
+        $(".subcalendar").remove();
       }
     }
+
+
+    function listCalends() {
+      gapi.client.calendar.calendarList.list({
+        "minAccessRole": "writer",
+        // "pageToken": "jjkko",
+        "showHidden": true
+      }).then(function(response) {
+        var calendar = response.result.items;
+        var strinx = calendar;
+        for (let index = 0; index < strinx.length; index++) {
+          name = strinx[index]['summary'];
+          color = strinx[index]['backgroundColor'];
+          id = strinx[index]['id'];
+          // console.log(name, color, id);
+          // $('#subcalendar').append('<option value="' + id + '">' + name + '</option>');
+          $('#subcalendar').append(`<option value="${id}" color="${color}">${name}</option>`);
+        }
+      });
+      // $("#subcalendar").show();
+      setTimeout(function() {
+        $('#subcalendar').each(createCustomSelect);
+      }, 300);
+    }
+
 
     /**
      *  Sign in the user upon button click.

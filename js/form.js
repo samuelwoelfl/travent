@@ -4,8 +4,9 @@ let delay = 2000;
 var vevents;
 var veventsLoop;
 
-var origin, destination, bufferBefore, bufferAfter, preferred
+var origin, destination, bufferBefore, bufferAfter, preferred, calendarID
 
+var locationBlacklist = ['Online', 'zoom', 'meets', 'webex'];
 // const center = {
 //   lat: 50.064192,
 //   lng: -130.605469
@@ -97,6 +98,8 @@ function sendData() {
     }
 
 
+    calendarID = $("#subcalendar").val();
+    // console.log(calendarID);
     origin = $("#start").val();
     destination = $("#end").val();
     bufferBefore = $("#buffer_before").val();
@@ -113,7 +116,7 @@ function sendData() {
     } else {
       preferred = [preferred];
     }
-    console.log(preferred);
+    // console.log(preferred);
 
     try {
       $submitButtonText.html("Search routes and create events ...");
@@ -133,7 +136,7 @@ function veventProcess() {
   clearInterval(veventsLoop);
 
   counter++;
-  maximum = vevents.length - 65;
+  maximum = vevents.length;
   if (counter == maximum) {
     clearInterval(veventsLoop);
     counter = 0;
@@ -158,9 +161,18 @@ function veventProcess() {
     if (destination == '') {
       destination = veventLocation;
     }
-    console.log(vevent);
+    // console.log(vevent);
 
-    if (start < today) {
+    allowed = true;
+    for (var i in locationBlacklist) {
+      item = locationBlacklist[i];
+      if (veventLocation.includes(item)) {
+        allowed = false;
+      }
+    }
+    // console.log(allowed);
+
+    if (start < today && allowed) {
       delay = 3000;
       // Hinfahrt
       getRoute(origin, destination, setArrivalTime, preferred, "arrival");
@@ -187,7 +199,6 @@ function getRoute(origin, destination, arrivalTime, preferred, mode) {
     transitOptions["departureTime"] = arrivalTime;
   }
 
-  console.log(service);
   service.route({
     origin: origin,
     destination: destination,
@@ -204,7 +215,7 @@ function getRoute(origin, destination, arrivalTime, preferred, mode) {
       textsForCal = formatToText(routesClean);
       // console.log(routesForCal);
       r = routesClean[0]
-      console.log(textsForCal);
+      // console.log(textsForCal);
       t = textsForCal[0];
       createCalEvent(t["heading"], t["steps"], r["departure"], r["arrival"])
     }
@@ -342,10 +353,10 @@ function createCalEvent(summary, description, start, end) {
       'timeZone': 'Europe/Berlin'
     },
   };
-  console.log(event);
+  // console.log(event);
 
   request = gapi.client.calendar.events.insert({
-    'calendarId': 'primary',
+    'calendarId': calendarID,
     'resource': event
   });
   request.execute(function(event) {
@@ -359,5 +370,5 @@ function createCalEvent(summary, description, start, end) {
 
 
 function initMap() {
-  console.log('test');
+  // console.log('test');
 }
