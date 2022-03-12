@@ -37,6 +37,7 @@
 .start_banner .info p {
   color: var(--text-primary);
   margin-left: 2%;
+  font-size: 1rem;
 }
 
 .start_banner button#denie_cookies {
@@ -128,7 +129,6 @@ h3 {
 }
 
 .cookie_toggle_modal:hover {
-  background-color: var(--bg-lighter);
   cursor: pointer;
   padding: .6%;
   padding-left: 1%;
