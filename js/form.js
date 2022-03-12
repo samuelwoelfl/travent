@@ -61,6 +61,7 @@ function getIcal(url) {
   // read text from URL location
   var request = new XMLHttpRequest();
   request.open('GET', url, true);
+  request.setRequestHeader("Access-Control-Allow-Origin", "*");
   request.send(null);
   request.onreadystatechange = function() {
     if (request.readyState === 4 && request.status === 200) {
