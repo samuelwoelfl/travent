@@ -62,6 +62,7 @@ function getIcal(url) {
   var request = new XMLHttpRequest();
   request.open('GET', url, true);
   request.setRequestHeader("Access-Control-Allow-Origin", "*");
+  request.setRequestHeader('Content-Type', 'application/json');
   request.send(null);
   request.onreadystatechange = function() {
     if (request.readyState === 4 && request.status === 200) {
