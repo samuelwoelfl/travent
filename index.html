@@ -26,9 +26,15 @@
   </script>
   <!-- fill css prefixes for browsers -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
-  <!-- Google API -->
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD428BZelApsygZBJJlGJXvmCzBNldPTSY&libraries=places&callback=initMap">
+  <!-- Google Maps API -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD428BZelApsygZBJJlGJXvmCzBNldPTSY&libraries=places&callback=initMap&loading=async">
   </script>
+  <!-- Google Identity Services (new OAuth library) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Google API Client Library -->
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <!-- Alternative Google API Client Library (fallback) -->
+  <script src="https://apis.google.com/js/api.js?onload=gapiLoaded" async defer></script>
   <!-- Lootie Files -->
   <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
   <!-- Configuration -->
@@ -120,8 +126,11 @@
         </div>
         <span id="google_message" class="left"></span>
       </div>
-      <select id="subcalendar" name="subcalendar" style="display:none">
-      </select>
+      <div id="calendar_selection_container" style="display:none;">
+        <label for="subcalendar">Select Destination Calendar:</label>
+        <select id="subcalendar" name="subcalendar">
+        </select>
+      </div>
       <span class="description">The calendar in which the created events should be inserted.</span>
 
       <h3 id="location">Location</h3>
@@ -198,120 +207,472 @@
     var CLIENT_ID = config.GOOGLE_CLIENT_ID;
     var API_KEY = config.GOOGLE_API_KEY;
 
-    // Array of API discovery doc URLs for APIs used by the quickstart
-    var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
-
-    // Authorization scopes required by the API; multiple scopes can be
-    // included, separated by spaces.
+    // Authorization scopes required by the API
     var SCOPES = "https://www.googleapis.com/auth/calendar";
 
     var authorizeButton = document.getElementById('authorize_button');
     var signoutButton = document.getElementById('signout_button');
+    var tokenClient;
+    var gapiInited = false;
+    var gisInited = false;
+    var calendarsLoaded = false; // Flag to prevent multiple calendar loads
 
     /**
-     *  On load, called to load the auth2 library and API client library.
+     * Callback after the Google Identity Services library loads.
      */
-    function handleClientLoad() {
-      gapi.load('client:auth2', initClient);
+    function gisLoaded() {
+      console.log('Google Identity Services loaded successfully');
+      gisInited = true;
+      maybeEnableButtons();
     }
 
     /**
-     *  Initializes the API client library and sets up sign-in state
-     *  listeners.
+     * Callback after the Google API client library loads.
      */
-    function initClient() {
-      gapi.client.init({
-        apiKey: API_KEY,
-        clientId: CLIENT_ID,
-        discoveryDocs: DISCOVERY_DOCS,
-        scope: SCOPES
-      }).then(function() {
-        // Listen for sign-in state changes.
-        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-
-        // Handle the initial sign-in state.
-        updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-        authorizeButton.onclick = handleAuthClick;
-        signoutButton.onclick = handleSignoutClick;
-      }, function(error) {
-        changeSpanText(JSON.stringify(error, null, 2));
+    function gapiLoaded() {
+      console.log('Google API Client loaded successfully');
+      
+      // Initialize the Google API client
+      gapi.load('client', function() {
+        console.log('Google API client loaded, initializing...');
+        gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"]
+        }).then(function() {
+          console.log('Google API client initialized successfully');
+          gapiInited = true;
+          maybeEnableButtons();
+        }).catch(function(error) {
+          console.error('Failed to initialize Google API client:', error);
+          changeSpanText('Error initializing Google API client: ' + error.message);
+        });
       });
     }
 
     /**
-     *  Called when the signed in status changes, to update the UI
-     *  appropriately. After a sign-in, the API is called.
+     * Fallback if libraries fail to load.
+     */
+    function handleLibraryError() {
+      changeSpanText("⚠️ Error: Google libraries failed to load. Please refresh the page.");
+      authorizeButton.style.pointerEvents = 'none';
+      authorizeButton.style.opacity = '0.5';
+    }
+
+    // Set a timeout to handle cases where libraries don't load
+    setTimeout(function() {
+      if (!gapiInited || !gisInited) {
+        console.error('Google libraries failed to load after 10 seconds');
+        changeSpanText("⚠️ Google libraries failed to load. This might be due to network issues or blocked requests. Please check your internet connection and try refreshing the page.");
+        authorizeButton.style.pointerEvents = 'none';
+        authorizeButton.style.opacity = '0.5';
+        
+        // Show additional troubleshooting info
+        const troubleshootingInfo = `
+          <br><br><strong>Troubleshooting:</strong>
+          <br>• Check if you can access https://accounts.google.com
+          <br>• Try disabling ad blockers or VPN
+          <br>• Check if your network blocks Google services
+          <br>• Try a different browser or incognito mode
+        `;
+        changeSpanText("⚠️ Google libraries failed to load. This might be due to network issues or blocked requests. Please check your internet connection and try refreshing the page." + troubleshootingInfo);
+      }
+    }, 10000); // 10 second timeout
+
+    // Function to check if libraries are loaded and initialize them
+    function checkAndInitializeLibraries() {
+      // Check if Google Identity Services is loaded
+      if (typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+        if (!gisInited) {
+          console.log('Google Identity Services detected, initializing...');
+          gisLoaded();
+        }
+      }
+
+      // Check if Google API Client is loaded
+      if (typeof gapi !== 'undefined' && gapi.client && gapi.client.init) {
+        if (!gapiInited) {
+          console.log('Google API Client detected, initializing...');
+          gapiLoaded();
+        }
+      }
+
+      // Additional check for gapi without client (sometimes it loads differently)
+      if (typeof gapi !== 'undefined' && !gapiInited && !gapi.client) {
+        console.log('Google API detected (without client), initializing...');
+        gapiLoaded();
+      }
+    }
+
+    // Poll for library availability with better error handling
+    const libraryCheckInterval = setInterval(function() {
+      checkAndInitializeLibraries();
+      
+      // Stop polling once both libraries are initialized
+      if (gapiInited && gisInited) {
+        clearInterval(libraryCheckInterval);
+        console.log('Both Google libraries initialized successfully');
+        changeSpanText('✅ Google libraries loaded successfully');
+      }
+    }, 200); // Check every 200ms for better performance
+
+    // Also try to load libraries manually if they fail
+    setTimeout(function() {
+      if (!gapiInited || !gisInited) {
+        console.log('Attempting manual library initialization...');
+        
+        // Test if Google services are reachable
+        testGoogleConnectivity();
+        
+        // Try to manually trigger library loading
+        if (typeof gapi === 'undefined') {
+          console.log('gapi not found, trying to load manually...');
+          const script = document.createElement('script');
+          script.src = 'https://apis.google.com/js/api.js';
+          script.onload = function() {
+            console.log('Google API Client loaded manually');
+            gapiLoaded();
+          };
+          script.onerror = function() {
+            console.error('Failed to load Google API Client manually');
+          };
+          document.head.appendChild(script);
+        }
+        
+        if (typeof google === 'undefined' || !google.accounts) {
+          console.log('Google Identity Services not found, trying to load manually...');
+          const script = document.createElement('script');
+          script.src = 'https://accounts.google.com/gsi/client';
+          script.onload = function() {
+            console.log('Google Identity Services loaded manually');
+            gisLoaded();
+          };
+          script.onerror = function() {
+            console.error('Failed to load Google Identity Services manually');
+          };
+          document.head.appendChild(script);
+        }
+      }
+    }, 3000); // Wait 3 seconds before manual loading
+
+    /**
+     * Test if Google services are reachable
+     */
+    function testGoogleConnectivity() {
+      console.log('Testing Google service connectivity...');
+      
+      // Test Google Identity Services
+      fetch('https://accounts.google.com/gsi/client', {method: 'HEAD'})
+        .then(response => {
+          console.log('Google Identity Services reachable:', response.status);
+        })
+        .catch(error => {
+          console.error('Google Identity Services not reachable:', error);
+        });
+      
+      // Test Google API
+      fetch('https://apis.google.com/js/api.js', {method: 'HEAD'})
+        .then(response => {
+          console.log('Google API reachable:', response.status);
+        })
+        .catch(error => {
+          console.error('Google API not reachable:', error);
+        });
+    }
+
+    /**
+     * Enables user interaction after all libraries are loaded.
+     */
+    function maybeEnableButtons() {
+      console.log('maybeEnableButtons called - gapiInited:', gapiInited, 'gisInited:', gisInited);
+      
+      if (gapiInited && gisInited) {
+        console.log('Both libraries ready, initializing buttons...');
+        
+        // Additional check to ensure gapi.client is really ready
+        if (typeof gapi === 'undefined' || !gapi.client || !gapi.client.init) {
+          console.log('gapi.client not ready yet, waiting...');
+          return;
+        }
+        
+        // Initialize Google Identity Services
+        gisInit();
+        
+        // Set up button event listeners
+        authorizeButton.onclick = handleAuthClick;
+        signoutButton.onclick = handleSignoutClick;
+        
+        // Check if user is already signed in
+        checkSignInStatus();
+        
+        console.log('Buttons initialized successfully');
+        changeSpanText('✅ Google Calendar integration ready! Click "Connect your Google Calendar" to get started.');
+      } else {
+        console.log('Waiting for libraries to load...');
+      }
+    }
+
+
+
+    /**
+     * Initializes the Google Identity Services library.
+     */
+    function gisInit() {
+      try {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: '', // defined later
+          ux_mode: 'popup', // Use popup mode to avoid COOP issues
+          prompt: 'consent'
+        });
+        console.log('Google Identity Services initialized successfully');
+      } catch (error) {
+        console.error('Failed to initialize Google Identity Services:', error);
+        changeSpanText('⚠️ Failed to initialize Google authentication. Please refresh the page.');
+      }
+    }
+
+    /**
+     * Checks if the user is already signed in.
+     */
+    function checkSignInStatus() {
+      // Only check if Google API is ready
+      if (!gapiInited || !gapi.client) {
+        return;
+      }
+
+      const accessToken = localStorage.getItem('google_access_token');
+      if (accessToken) {
+        // User has a token, try to use it
+        try {
+          gapi.client.setToken({access_token: accessToken});
+          updateSigninStatus(true);
+          listCalends();
+        } catch (error) {
+          // If setting token fails, clear it and show sign-in state
+          localStorage.removeItem('google_access_token');
+          updateSigninStatus(false);
+        }
+      } else {
+        updateSigninStatus(false);
+      }
+    }
+
+    /**
+     * Handles the sign-in flow.
+     */
+    function handleAuthClick() {
+      // Check if Google API is ready
+      if (!gapiInited || !gapi.client) {
+        changeSpanText('⚠️ Google API is not ready yet. Please wait a moment and try again.');
+        return;
+      }
+
+      tokenClient.callback = async (resp) => {
+        if (resp.error !== undefined) {
+          changeSpanText('Error: ' + resp.error);
+          return;
+        }
+        
+        // Store the access token
+        localStorage.setItem('google_access_token', resp.access_token);
+        
+        // Set the token for gapi client
+        gapi.client.setToken({access_token: resp.access_token});
+        
+        // Update UI
+        updateSigninStatus(true);
+        
+        // List calendars
+        listCalends();
+      };
+
+      // Check if we already have a token
+      try {
+        const existingToken = gapi.client.getToken();
+        if (existingToken === null) {
+          // Prompt the user to select a Google Account and ask for consent
+          tokenClient.requestAccessToken({prompt: 'consent'});
+        } else {
+          // Skip display of account chooser and consent dialog for an existing session
+          tokenClient.requestAccessToken({prompt: ''});
+        }
+      } catch (error) {
+        // If getToken fails, just request a new token
+        tokenClient.requestAccessToken({prompt: 'consent'});
+      }
+    }
+
+    /**
+     * Handles the sign-out flow.
+     */
+    function handleSignoutClick() {
+      // Check if Google API is ready
+      if (!gapiInited || !gapi.client) {
+        changeSpanText('⚠️ Google API is not ready yet. Please wait a moment and try again.');
+        return;
+      }
+
+      try {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken('');
+          localStorage.removeItem('google_access_token');
+          updateSigninStatus(false);
+        }
+      } catch (error) {
+        // If getToken fails, just clear local storage and update UI
+        localStorage.removeItem('google_access_token');
+        updateSigninStatus(false);
+        changeSpanText('Signed out successfully');
+      }
+    }
+
+    /**
+     * Updates the UI based on sign-in status.
      */
     function updateSigninStatus(isSignedIn) {
       if (isSignedIn) {
         authorizeButton.style.display = 'none';
         signoutButton.style.display = 'flex';
-        changeSpanText("🎉 You have been logged in succesfully");
-        listCalends();
+        changeSpanText("🎉 You have been logged in successfully!");
       } else {
         authorizeButton.style.display = 'flex';
         signoutButton.style.display = 'none';
         changeSpanText("");
+        
+        // Clear and hide the calendar selection container
         $("#subcalendar").empty();
-        $("#subcalendar").unwrap("div.select");
-        $(".subcalendar").remove();
+        $("#calendar_selection_container").hide();
+        
+        // Remove custom select styling if it exists
+        try {
+          $("#subcalendar").unwrap("div.select");
+          $(".subcalendar").remove();
+        } catch (error) {
+          console.log('No existing custom select to remove');
+        }
+        
+
       }
     }
 
-
+    /**
+     * Lists the user's calendars.
+     */
     function listCalends() {
+      console.log('Loading calendars...');
+      
+
+      
+      // Check if we have a valid token
+      const accessToken = localStorage.getItem('google_access_token');
+      if (!accessToken) {
+        changeSpanText('⚠️ No access token available. Please sign in again.');
+        return;
+      }
+
+      // Ensure the token is set for the API client
+      try {
+        gapi.client.setToken({access_token: accessToken});
+      } catch (error) {
+        console.error('Failed to set token:', error);
+        changeSpanText('⚠️ Failed to authenticate with Google API. Please sign in again.');
+        return;
+      }
+
       gapi.client.calendar.calendarList.list({
         "minAccessRole": "writer",
-        // "pageToken": "jjkko",
         "showHidden": true
       }).then(function(response) {
-        var calendar = response.result.items;
-        var strinx = calendar;
-        for (let index = 0; index < strinx.length; index++) {
-          name = strinx[index]['summary'];
-          color = strinx[index]['backgroundColor'];
-          id = strinx[index]['id'];
-          // console.log(name, color, id);
-          // $('#subcalendar').append('<option value="' + id + '">' + name + '</option>');
-          $('#subcalendar').append(`<option value="${id}" color="${color}">${name}</option>`);
+        console.log('Calendars loaded successfully:', response);
+        
+        if (!response.result || !response.result.items) {
+          changeSpanText('⚠️ No calendars found or insufficient permissions.');
+          return;
+        }
+
+        var calendars = response.result.items;
+        console.log('Found calendars:', calendars.length);
+        
+        // Clear existing options and remove any existing custom select styling
+        $("#subcalendar").empty();
+        try {
+          $("#subcalendar").unwrap("div.select");
+          $(".subcalendar").remove();
+        } catch (error) {
+          console.log('No existing custom select to remove');
+        }
+        
+        // Add calendars to dropdown
+        for (let index = 0; index < calendars.length; index++) {
+          var calendar = calendars[index];
+          var name = calendar.summary || 'Unnamed Calendar';
+          var color = calendar.backgroundColor || '#4285f4';
+          var id = calendar.id;
+          
+          console.log('Adding calendar:', name, id);
+          
+          $('#subcalendar').append(`<option value="${id}" data-color="${color}">${name}</option>`);
+        }
+        
+        // Show the calendar selection container
+        $("#calendar_selection_container").show();
+        
+        // Apply custom select styling
+        setTimeout(function() {
+          if (typeof createCustomSelect === 'function') {
+            $('#subcalendar').each(createCustomSelect);
+          } else {
+            console.log('createCustomSelect function not available');
+          }
+        }, 100);
+        
+        changeSpanText(`✅ Successfully loaded ${calendars.length} calendar(s). Please select one from the dropdown above.`);
+        
+        // Add a refresh button for calendars
+        if (!$('#refresh_calendars').length) {
+          $('#google_message').after('<button id="refresh_calendars" class="secondary" style="margin-top: 10px;">🔄 Refresh Calendars</button>');
+          $('#refresh_calendars').on('click', function() {
+            listCalends();
+          });
+        }
+        
+      }).catch(function(error) {
+        console.error('Error loading calendars:', error);
+        
+        if (error.status === 401) {
+          changeSpanText('⚠️ Authentication failed. Please sign in again.');
+          // Clear invalid token
+          localStorage.removeItem('google_access_token');
+          updateSigninStatus(false);
+        } else if (error.status === 403) {
+          changeSpanText('⚠️ Insufficient permissions to access calendars. Please check your Google Calendar settings.');
+        } else {
+          changeSpanText('⚠️ Error loading calendars: ' + (error.message || error.statusText || 'Unknown error'));
         }
       });
-      // $("#subcalendar").show();
-      setTimeout(function() {
-        $('#subcalendar').each(createCustomSelect);
-      }, 500);
-    }
-
-
-    /**
-     *  Sign in the user upon button click.
-     */
-    function handleAuthClick(event) {
-      gapi.auth2.getAuthInstance().signIn();
     }
 
     /**
-     *  Sign out the user upon button click.
-     */
-    function handleSignoutClick(event) {
-      gapi.auth2.getAuthInstance().signOut();
-    }
-
-    /**
-     * Append a pre element to the body containing the given message
-     * as its text node. Used to display the results of the API call.
-     *
-     * @param {string} message Text to be placed in pre element.
+     * Displays a message in the UI.
      */
     function changeSpanText(message) {
       var pre = $('span#google_message');
       var textContent = document.createTextNode(message + '\n');
       pre.html(textContent);
     }
+
+    // Initialize when the page loads
+    window.addEventListener('load', function() {
+      // Ensure calendar selection is hidden initially
+      $("#calendar_selection_container").hide();
+    });
+
   </script>
 
-  <script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()" onreadystatechange="if (this.readyState === 'complete') this.onload()">
-  </script>
+
 
 
 

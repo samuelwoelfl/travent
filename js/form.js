@@ -30,11 +30,9 @@ const options = {
   types: ["education"],
 };
 
-let requests = 5;
+
 $(window).on("load", function() {
   service = new google.maps.DirectionsService;
-  // autocompleteService = new google.maps.places;
-  // autocompleteService = new google.maps.places.AutocompletionRequest;
 
   $submitButton = $('button[type="submit"]');
   $submitButtonText = $('button[type="submit"] .text');
@@ -42,18 +40,24 @@ $(window).on("load", function() {
   $startInput = $('input#start');
   $endInput = $('input#end');
 
-  var searchBoxStart = new google.maps.places.SearchBox($startInput.get(0), options);
-  var searchBoxEnd = new google.maps.places.SearchBox($endInput.get(0), options);
-  // $startInput.on('input', function() {
-  //   value = $startInput.val();
-  //   // var autocomplete = autocompleteService.Autocomplete(value);
-  //   if (requests % 5 == 0) {
-  //     // var autocomplete = new google.maps.places.Autocomplete($startInput.get(0), options);
-  //
-  //   }
-  //   requests++
-  //   // console.log(autocomplete);
-  // });
+  // Use modern Autocomplete instead of deprecated SearchBox
+  var autocompleteStart = new google.maps.places.Autocomplete($startInput.get(0), options);
+  var autocompleteEnd = new google.maps.places.Autocomplete($endInput.get(0), options);
+  
+  // Add place_changed event listeners for better user experience
+  autocompleteStart.addListener('place_changed', function() {
+    var place = autocompleteStart.getPlace();
+    if (place.geometry) {
+      console.log('Start location selected:', place.formatted_address);
+    }
+  });
+  
+  autocompleteEnd.addListener('place_changed', function() {
+    var place = autocompleteEnd.getPlace();
+    if (place.geometry) {
+      console.log('End location selected:', place.formatted_address);
+    }
+  });
 });
 
 
@@ -346,6 +350,13 @@ function meterToText(d) {
 
 
 function createCalEvent(summary, description, start, end) {
+  // Check if we have a valid access token
+  const accessToken = localStorage.getItem('google_access_token');
+  if (!accessToken) {
+    console.log('No access token available. User needs to authenticate first.');
+    return;
+  }
+
   event = {
     'summary': summary,
     'description': description,
